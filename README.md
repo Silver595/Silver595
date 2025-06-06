@@ -1,4 +1,4 @@
-<h2 align="left">Hi 👋! My name is Silver and I'm a Student, from |-_-| </h2>
+<h2 align="left">Hi 👋! My name is Silver, and I'm a Student from |-_-| </h2>
 
 ###
 
