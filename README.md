@@ -17,7 +17,7 @@
 
 ### 💻 Programming Languages
 <p align="center">
-    <img src="https://skillicons.dev/icons?i=js,ts,python,java,rust,react,nextjs,nodejs,postgres,mongodb,docker,linux," height="48" style="margin: 0 10px;" alt="Programming Languages"/>
+    <img src="https://skillicons.dev/icons?i=linux,rust,bash,js,ts,python,java,react,nextjs,nodejs,postgres,mongodb,docker," height="48" style="margin: 0 10px;" alt="Programming Languages"/>
 </p>
 
 
@@ -43,16 +43,15 @@
 <div align="center">
   
   <!-- GitHub trophies -->
-  <img src="https://github-profile-trophy.vercel.app/?username=SIlver595&theme=tokyonight&no-frame=true&no-bg=true&margin-w=4&row=2"/>
+  <img src="https://github-profile-trophy.vercel.app/?username=Silver595&theme=tokyonight&no-frame=true&no-bg=true&margin-w=4&row=2"/>
+
 
 </div>
 
+---
 
-<p align="center">
-<img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3F1OHQ0dTAxaWE0NXZkZHg1aTRoOWpmY3lnZXpuc2dvdnh2bGtkdSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/kg9fAQryp5fMY/200.webp" alt="Coding Animation Gif" width="800"/>
-</p>
+
 <div align="center">
-
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0e5cad,5f2c82,49a09d,f2d694,ff6e7f&height=140&section=footer&animation=twinkling&fontColor=fff&text=Thank%20You%20for%20Visiting!&fontSize=30" alt="Footer" width="800"/>
 
 </div>
