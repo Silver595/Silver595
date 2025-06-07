@@ -1,4 +1,4 @@
-<h2 align="left">Hi 👋! My name is Silver, and I'm a Student from |-_-| </h2>
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&center=true&vCenter=true&width=435&lines=Hi+%F0%9F%91%8B!+My+name+is+Silver;+I'm+a+Student+from+%7C-_-%7C)](https://git.io/typing-svg)
 
 ###
 
