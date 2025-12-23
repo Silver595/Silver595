@@ -17,7 +17,7 @@
 
 ### 💻 Programming Languages
 <p align="center">
-    <img src="https://skillicons.dev/icons?i=linux,rust,bash,js,ts,python,java,react,nextjs,nodejs,postgres,mongodb,docker," height="48" style="margin: 0 10px;" alt="Programming Languages"/>
+    <img src="https://skillicons.dev/icons?i=linux,bash,js,ts,python,java,react,nextjs,nodejs,postgres,mongodb,docker," height="48" style="margin: 0 10px;" alt="Programming Languages"/>
 </p>
 
 
