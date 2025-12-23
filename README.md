@@ -33,9 +33,6 @@
 <!-- Streak stats -->
 <img src="https://github-readme-streak-stats.herokuapp.com/?user=SIlver595&theme=tokyonight&hide_border=true&background=00000000&stroke=58A6FF&ring=1F6FEB&fire=FFA500&currStreakLabel=58A6FF&sideLabels=C9D1D9&currStreakNum=C9D1D9&sideNums=C9D1D9"/>
 
-<!-- Advanced activity graph -->
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=SIlver595&theme=tokyo-night&bg_color=00000000&color=58A6FF&line=1F6FEB&point=FFA500&area=true&hide_border=true&custom_title=Contribution%20Graph"/>
-
 </div>
 
 ## 🏆 Achievements & Trophies
