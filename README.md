@@ -5,11 +5,11 @@
 ![Header](https://capsule-render.vercel.app/api?type=waving&color=0e5cad,5f2c82,49a09d,f2d694,ff6e7f&height=300&section=header&text=Welcome%20To%20My%20Profile&fontSize=50&fontColor=fff&animation=twinkling&fontAlignY=35)
   
   <!-- Multiple typing animations -->
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=35&duration=2000&pause=500&color=00D9FF&center=true&vCenter=true&width=800&lines=Hi+%F0%9F%91%8B+I'm+Silver;I+am+student+from+|-_-|)](https://git.io/typing-svg)
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=35&duration=2000&pause=500&color=00D9FF&center=true&vCenter=true&width=800&lines=Hi+%F0%9F%91%8B+I'm+Akash;I+am+student+from+India)](https://git.io/typing-svg)
   
   
 
-  <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHcydW45Z3ppeXA3M28wbGQzd202am1vNG9ienloYnFwazJzNHQ1aiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Zqe1S3qNQxsuQ/200.webp" alt="true detective" width="800">
+<img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExODR2eWlreXAwZjgzOTY0eWFwbHFxMWM3NTF6OGVxZ3FrNHU4ajQ4cyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CMdqo9TSQVzWOznb9a/giphy.gif" alt="Thorfin" width="800">
 
 </div>
 
