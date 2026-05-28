@@ -9,7 +9,7 @@
   
   
 
-<img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExODR2eWlreXAwZjgzOTY0eWFwbHFxMWM3NTF6OGVxZ3FrNHU4ajQ4cyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CMdqo9TSQVzWOznb9a/giphy.gif" alt="Thorfin" width="800">
+<img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDRqM2dib2l6ajVseW5pZXJmYmVva2M5NXNwM210em1mMWFiMHR4YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/rsSqboqmIGkbQ0Ebaa/giphy.gif" alt="Thorfin" width="800">
 
 </div>
 
