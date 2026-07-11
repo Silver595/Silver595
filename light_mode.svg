@@ -34,7 +34,7 @@
   <text x="44" y="402" class="mono statlabel">repositories</text>
   <text x="194" y="380" class="mono statnum">31</text>
   <text x="194" y="402" class="mono statlabel">stars earned</text>
-  <text x="344" y="380" class="mono statnum">364</text>
+  <text x="344" y="380" class="mono statnum">365</text>
   <text x="344" y="402" class="mono statlabel">commits (this yr)</text>
   <text x="554" y="380" class="mono statnum">50</text>
   <text x="554" y="402" class="mono statlabel">followers</text>
@@ -49,7 +49,7 @@
   <text x="44" y="552" class="mono key">portfolio</text>
   <text x="200" y="552" class="mono val">akashpurjalkar.online</text>
   <line x1="44" y1="586" x2="956" y2="586" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
-  <text x="44" y="614" class="mono muted">last synced 2026-07-11 12:20 PM IST</text>
+  <text x="44" y="614" class="mono muted">last synced 2026-07-11 12:34 PM IST</text>
   <circle cx="794" cy="609" r="5" fill="#1a7f37"/>
   <text x="806" y="614" class="mono muted">live</text>
 </svg>
