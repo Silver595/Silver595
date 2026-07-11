@@ -20,7 +20,14 @@ Run locally:
 import os
 import json
 import datetime
+from zoneinfo import ZoneInfo
 import requests
+
+IST = ZoneInfo("Asia/Kolkata")
+
+
+def now_ist_string():
+    return datetime.datetime.now(IST).strftime("%Y-%m-%d %I:%M %p IST")
 
 # ---------------------------------------------------------------------------
 # Config — edit these for your own profile
@@ -30,6 +37,16 @@ DISPLAY_NAME = "Akash"
 ALIAS = "aka silver"
 LOCATION = "Pune, India"
 CACHE_PATH = "cache/stats.json"
+
+# Item 5 — contact / links section. Edit these directly; leave value ""
+# to skip a row entirely (e.g. no twitter yet).
+CONTACTS = [
+    ("email",     "akashpurjalkar@gmail.com"),
+    ("github",    "github.com/Silver595"),
+    ("linkedin",  ""),          # e.g. "linkedin.com/in/yourhandle"
+    ("portfolio", "akashpurjalkar.online"),
+    ("project",   ""),          # optional — e.g. a flagship project URL
+]
 
 GITHUB_API = "https://api.github.com/graphql"
 TOKEN = os.environ.get("ACCESS_TOKEN")
@@ -68,10 +85,14 @@ query($login: String!) {
 
 def fetch_stats():
     """Query GitHub's GraphQL API for live stats. Falls back to cached
-    values on any failure so the workflow never breaks the README."""
+    values on any failure so the workflow never breaks the README —
+    but the SVG will visibly say 'cached' instead of silently pretending
+    to be live, so a broken token is obvious at a glance."""
     if not TOKEN:
-        print("No ACCESS_TOKEN set — falling back to cache.")
-        return load_cache()
+        print("::warning::No ACCESS_TOKEN set — falling back to cache.")
+        stats = load_cache()
+        stats["source"] = "cached (no token)"
+        return stats
 
     try:
         resp = requests.post(
@@ -81,7 +102,12 @@ def fetch_stats():
             timeout=15,
         )
         resp.raise_for_status()
-        data = resp.json()["data"]["user"]
+        payload = resp.json()
+
+        if "errors" in payload:
+            raise RuntimeError(payload["errors"])
+
+        data = payload["data"]["user"]
 
         repos = data["repositories"]["nodes"]
         total_stars = sum(r["stargazers"]["totalCount"] for r in repos)
@@ -92,7 +118,9 @@ def fetch_stats():
             lang = r["primaryLanguage"]["name"] if r["primaryLanguage"] else None
             if lang:
                 lang_counts[lang] = lang_counts.get(lang, 0) + 1
-        top_langs = sorted(lang_counts.items(), key=lambda kv: -kv[1])[:4]
+        # NOTE: item 4 — no hard cap here anymore. All languages found are
+        # kept, sorted by frequency; render_svg() decides how many fit.
+        top_langs = sorted(lang_counts.items(), key=lambda kv: -kv[1])
 
         contrib = data["contributionsCollection"]
         total_commits = (
@@ -108,14 +136,17 @@ def fetch_stats():
             "commits": total_commits,
             "contributions_last_year": contrib["contributionCalendar"]["totalContributions"],
             "top_langs": top_langs,
-            "updated": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+            "updated": now_ist_string(),
+            "source": "live",
         }
         save_cache(stats)
         return stats
 
     except Exception as e:
-        print(f"Live fetch failed ({e}), falling back to cache.")
-        return load_cache()
+        print(f"::error::Live fetch failed ({e}) — falling back to cache.")
+        stats = load_cache()
+        stats["source"] = f"cached (fetch failed)"
+        return stats
 
 
 def load_cache():
@@ -156,68 +187,127 @@ THEMES = {
     },
 }
 
-WIDTH, HEIGHT = 900, 460
+def compute_height(stats):
+    """Height depends on how many language-lines wrap and how many
+    contact rows are visible (items 4 + 5 both add variable-length
+    content), so the canvas is sized to fit instead of hardcoded."""
+    lang_names = [name for name, _ in stats["top_langs"]] or ["—"]
+    n_lang_lines = len(wrap_items(lang_names, max_per_line=6))
+    n_contacts = len([1 for _, v in CONTACTS if v])
+
+    y = 186                                          # header -> first rule
+    y += 26 + (n_lang_lines - 1) * 26 + 18            # stack lines -> rule2
+    y += 28 + 42 + 22 + 30                            # stats block -> rule3
+    y += 28 + 32 + max(n_contacts, 1) * 30 + 4        # connect block -> rule4
+    y += 28 + 60                                      # footer text + generous bottom margin
+    return y
+
+
+WIDTH = 1000
+
+
+def wrap_items(items, max_per_line=6):
+    """Split a list of language names into lines for wrapping instead of
+    overflowing the card edge when the list grows (item 4)."""
+    lines, current = [], []
+    for i, name in enumerate(items):
+        current.append(name)
+        if len(current) == max_per_line:
+            lines.append(current)
+            current = []
+    if current:
+        lines.append(current)
+    return lines
 
 
 def render_svg(stats, theme_name):
     t = THEMES[theme_name]
-    lang_line = "   ·   ".join(f"{name}" for name, _ in stats["top_langs"]) or "—"
+    HEIGHT = compute_height(stats)
+    lang_names = [name for name, _ in stats["top_langs"]] or ["—"]
+    lang_lines = wrap_items(lang_names, max_per_line=6)
 
-    svg = f'''<svg width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+    is_live = stats.get("source") == "live"
+    status_color = t["accent_green"] if is_live else "#e06c75"
+    status_text = "live" if is_live else stats.get("source", "cached")
+
+    parts = [f'''<svg width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}" xmlns="http://www.w3.org/2000/svg">
   <style>
     .mono {{ font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }}
-    .name {{ font-size: 30px; fill: {t['text_primary']}; }}
-    .alias {{ font-size: 18px; fill: {t['accent_blue']}; }}
+    .name {{ font-size: 32px; fill: {t['text_primary']}; }}
+    .alias {{ font-size: 19px; fill: {t['accent_blue']}; }}
     .muted {{ font-size: 15px; fill: {t['text_muted']}; }}
     .label {{ font-size: 15px; fill: {t['text_dim']}; }}
-    .body {{ font-size: 16px; fill: {t['text_body']}; }}
-    .statnum {{ font-size: 26px; fill: {t['accent_amber']}; }}
+    .body {{ font-size: 17px; fill: {t['text_body']}; }}
+    .statnum {{ font-size: 27px; fill: {t['accent_amber']}; }}
     .statlabel {{ font-size: 13px; fill: {t['text_dim']}; }}
     .key {{ font-size: 16px; fill: {t['accent_blue']}; }}
+    .val {{ font-size: 16px; fill: {t['text_body']}; }}
   </style>
 
-  <rect x="0.5" y="0.5" width="{WIDTH-1}" height="{HEIGHT-1}" rx="12" fill="{t['bg']}" stroke="{t['card_stroke']}" stroke-width="1"/>
+  <rect x="0.5" y="0.5" width="{WIDTH-1}" height="{HEIGHT-1}" rx="14" fill="{t['bg']}" stroke="{t['card_stroke']}" stroke-width="1"/>
 
-  <circle cx="34" cy="34" r="6" fill="#e06c75"/>
-  <circle cx="56" cy="34" r="6" fill="#e5c07b"/>
-  <circle cx="78" cy="34" r="6" fill="#98c379"/>
-  <text x="{WIDTH-40}" y="39" text-anchor="end" class="mono muted">~/{USERNAME.lower()}</text>
+  <circle cx="36" cy="36" r="6" fill="#e06c75"/>
+  <circle cx="58" cy="36" r="6" fill="#e5c07b"/>
+  <circle cx="80" cy="36" r="6" fill="#98c379"/>
+  <text x="{WIDTH-44}" y="41" text-anchor="end" class="mono muted">~/{USERNAME.lower()}</text>
 
-  <text x="40" y="94" class="mono name">{DISPLAY_NAME}</text>
-  <text x="40" y="122" class="mono alias">{ALIAS}</text>
-  <text x="40" y="150" class="mono muted">{LOCATION}</text>
+  <text x="44" y="100" class="mono name">{DISPLAY_NAME}</text>
+  <text x="44" y="130" class="mono alias">{ALIAS}</text>
+  <text x="44" y="158" class="mono muted">{LOCATION}</text>
 
-  <line x1="40" y1="176" x2="{WIDTH-40}" y2="176" stroke="{t['divider']}" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="44" y1="186" x2="{WIDTH-44}" y2="186" stroke="{t['divider']}" stroke-width="1" stroke-dasharray="4 4"/>
 
-  <text x="40" y="204" class="mono label">stack</text>
-  <text x="40" y="230" class="mono body">{lang_line}</text>
+  <text x="44" y="214" class="mono label">stack</text>''']
 
-  <line x1="40" y1="256" x2="{WIDTH-40}" y2="256" stroke="{t['divider']}" stroke-width="1" stroke-dasharray="4 4"/>
+    # --- item 4: wrapped, unlimited-length language block ---
+    y = 240
+    for line in lang_lines:
+        parts.append(f'  <text x="44" y="{y}" class="mono body">{"   ·   ".join(line)}</text>')
+        y += 26
 
-  <text x="40" y="284" class="mono label">live stats</text>
+    rule2_y = y + 18
+    parts.append(f'  <line x1="44" y1="{rule2_y}" x2="{WIDTH-44}" y2="{rule2_y}" stroke="{t["divider"]}" stroke-width="1" stroke-dasharray="4 4"/>')
 
-  <text x="40" y="326" class="mono statnum">{stats['repos']}</text>
-  <text x="40" y="348" class="mono statlabel">repositories</text>
+    stats_label_y = rule2_y + 28
+    parts.append(f'  <text x="44" y="{stats_label_y}" class="mono label">live stats</text>')
 
-  <text x="190" y="326" class="mono statnum">{stats['stars']}</text>
-  <text x="190" y="348" class="mono statlabel">stars earned</text>
+    row_y = stats_label_y + 42
+    row_label_y = row_y + 22
+    cols = [
+        (44,  stats['repos'],     "repositories"),
+        (194, stats['stars'],     "stars earned"),
+        (344, stats['commits'],   "commits (this yr)"),
+        (554, stats['followers'], "followers"),
+        (704, stats['forks'],     "forks received"),
+    ]
+    for x, val, label in cols:
+        parts.append(f'  <text x="{x}" y="{row_y}" class="mono statnum">{val}</text>')
+        parts.append(f'  <text x="{x}" y="{row_label_y}" class="mono statlabel">{label}</text>')
 
-  <text x="340" y="326" class="mono statnum">{stats['commits']}</text>
-  <text x="340" y="348" class="mono statlabel">commits (this year)</text>
+    rule3_y = row_label_y + 30
+    parts.append(f'  <line x1="44" y1="{rule3_y}" x2="{WIDTH-44}" y2="{rule3_y}" stroke="{t["divider"]}" stroke-width="1" stroke-dasharray="4 4"/>')
 
-  <text x="540" y="326" class="mono statnum">{stats['followers']}</text>
-  <text x="540" y="348" class="mono statlabel">followers</text>
+    # --- item 5: contacts / links block ---
+    connect_label_y = rule3_y + 28
+    parts.append(f'  <text x="44" y="{connect_label_y}" class="mono label">connect</text>')
 
-  <text x="680" y="326" class="mono statnum">{stats['forks']}</text>
-  <text x="680" y="348" class="mono statlabel">forks received</text>
+    c_y = connect_label_y + 32
+    visible_contacts = [(k, v) for k, v in CONTACTS if v]
+    for key, val in visible_contacts:
+        parts.append(f'  <text x="44" y="{c_y}" class="mono key">{key}</text>')
+        parts.append(f'  <text x="200" y="{c_y}" class="mono val">{val}</text>')
+        c_y += 30
 
-  <line x1="40" y1="378" x2="{WIDTH-40}" y2="378" stroke="{t['divider']}" stroke-width="1" stroke-dasharray="4 4"/>
+    rule4_y = c_y + 4
+    parts.append(f'  <line x1="44" y1="{rule4_y}" x2="{WIDTH-44}" y2="{rule4_y}" stroke="{t["divider"]}" stroke-width="1" stroke-dasharray="4 4"/>')
 
-  <text x="40" y="406" class="mono muted">last synced {stats['updated']}</text>
-  <circle cx="{WIDTH-196}" cy="401" r="5" fill="{t['accent_green']}"/>
-  <text x="{WIDTH-184}" y="406" class="mono muted">auto-updates 12h</text>
-</svg>'''
-    return svg
+    footer_y = rule4_y + 28
+    parts.append(f'  <text x="44" y="{footer_y}" class="mono muted">last synced {stats["updated"]}</text>')
+    parts.append(f'  <circle cx="{WIDTH-206}" cy="{footer_y-5}" r="5" fill="{status_color}"/>')
+    parts.append(f'  <text x="{WIDTH-194}" y="{footer_y}" class="mono muted">{status_text}</text>')
+
+    parts.append('</svg>')
+    return "\n".join(parts)
 
 
 def main():
