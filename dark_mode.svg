@@ -1,54 +1,55 @@
-<svg width="900" height="460" viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg">
+<svg width="1000" height="620" viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">
   <style>
     .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
-    .name { font-size: 30px; fill: #e6e9ef; }
-    .alias { font-size: 18px; fill: #7aa2f7; }
+    .name { font-size: 32px; fill: #e6e9ef; }
+    .alias { font-size: 19px; fill: #7aa2f7; }
     .muted { font-size: 15px; fill: #7d8590; }
     .label { font-size: 15px; fill: #565f78; }
-    .body { font-size: 16px; fill: #c8cdd8; }
-    .statnum { font-size: 26px; fill: #e5c07b; }
+    .body { font-size: 17px; fill: #c8cdd8; }
+    .statnum { font-size: 27px; fill: #e5c07b; }
     .statlabel { font-size: 13px; fill: #565f78; }
     .key { font-size: 16px; fill: #7aa2f7; }
+    .val { font-size: 16px; fill: #c8cdd8; }
   </style>
 
-  <rect x="0.5" y="0.5" width="899" height="459" rx="12" fill="#0b0e14" stroke="#1c2230" stroke-width="1"/>
+  <rect x="0.5" y="0.5" width="999" height="619" rx="14" fill="#0b0e14" stroke="#1c2230" stroke-width="1"/>
 
-  <circle cx="34" cy="34" r="6" fill="#e06c75"/>
-  <circle cx="56" cy="34" r="6" fill="#e5c07b"/>
-  <circle cx="78" cy="34" r="6" fill="#98c379"/>
-  <text x="860" y="39" text-anchor="end" class="mono muted">~/silver595</text>
+  <circle cx="36" cy="36" r="6" fill="#e06c75"/>
+  <circle cx="58" cy="36" r="6" fill="#e5c07b"/>
+  <circle cx="80" cy="36" r="6" fill="#98c379"/>
+  <text x="956" y="41" text-anchor="end" class="mono muted">~/silver595</text>
 
-  <text x="40" y="94" class="mono name">Akash</text>
-  <text x="40" y="122" class="mono alias">aka silver</text>
-  <text x="40" y="150" class="mono muted">Pune, India</text>
+  <text x="44" y="100" class="mono name">Akash</text>
+  <text x="44" y="130" class="mono alias">aka silver</text>
+  <text x="44" y="158" class="mono muted">Pune, India</text>
 
-  <line x1="40" y1="176" x2="860" y2="176" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="44" y1="186" x2="956" y2="186" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
 
-  <text x="40" y="204" class="mono label">stack</text>
-  <text x="40" y="230" class="mono body">JavaScript   ·   Python   ·   TypeScript   ·   Batchfile</text>
-
-  <line x1="40" y1="256" x2="860" y2="256" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
-
-  <text x="40" y="284" class="mono label">live stats</text>
-
-  <text x="40" y="326" class="mono statnum">27</text>
-  <text x="40" y="348" class="mono statlabel">repositories</text>
-
-  <text x="190" y="326" class="mono statnum">31</text>
-  <text x="190" y="348" class="mono statlabel">stars earned</text>
-
-  <text x="340" y="326" class="mono statnum">359</text>
-  <text x="340" y="348" class="mono statlabel">commits (this year)</text>
-
-  <text x="540" y="326" class="mono statnum">50</text>
-  <text x="540" y="348" class="mono statlabel">followers</text>
-
-  <text x="680" y="326" class="mono statnum">10</text>
-  <text x="680" y="348" class="mono statlabel">forks received</text>
-
-  <line x1="40" y1="378" x2="860" y2="378" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
-
-  <text x="40" y="406" class="mono muted">last synced 2026-07-11 06:27 UTC</text>
-  <circle cx="704" cy="401" r="5" fill="#98c379"/>
-  <text x="716" y="406" class="mono muted">auto-updates 12h</text>
+  <text x="44" y="214" class="mono label">stack</text>
+  <text x="44" y="240" class="mono body">JavaScript   ·   Python   ·   TypeScript   ·   Batchfile   ·   Rust   ·   Shell</text>
+  <text x="44" y="266" class="mono body">Java   ·   HTML</text>
+  <line x1="44" y1="310" x2="956" y2="310" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="44" y="338" class="mono label">live stats</text>
+  <text x="44" y="380" class="mono statnum">27</text>
+  <text x="44" y="402" class="mono statlabel">repositories</text>
+  <text x="194" y="380" class="mono statnum">31</text>
+  <text x="194" y="402" class="mono statlabel">stars earned</text>
+  <text x="344" y="380" class="mono statnum">360</text>
+  <text x="344" y="402" class="mono statlabel">commits (this yr)</text>
+  <text x="554" y="380" class="mono statnum">50</text>
+  <text x="554" y="402" class="mono statlabel">followers</text>
+  <text x="704" y="380" class="mono statnum">10</text>
+  <text x="704" y="402" class="mono statlabel">forks received</text>
+  <line x1="44" y1="432" x2="956" y2="432" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="44" y="460" class="mono label">connect</text>
+  <text x="44" y="492" class="mono key">email</text>
+  <text x="200" y="492" class="mono val">akashpurjalkar@gmail.com</text>
+  <text x="44" y="522" class="mono key">github</text>
+  <text x="200" y="522" class="mono val">github.com/Silver595</text>
+  <text x="44" y="552" class="mono key">portfolio</text>
+  <text x="200" y="552" class="mono val">akashpurjalkar.online</text>
+  <line x1="44" y1="586" x2="956" y2="586" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="44" y="614" class="mono muted">last synced 2026-07-11 12:13 PM IST</text>
+  <circle cx="794" cy="609" r="5" fill="#98c379"/>
+  <text x="806" y="614" class="mono muted">live</text>
 </svg>

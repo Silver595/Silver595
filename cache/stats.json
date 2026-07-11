@@ -3,8 +3,8 @@
   "followers": 50,
   "stars": 31,
   "forks": 10,
-  "commits": 359,
-  "contributions_last_year": 395,
+  "commits": 360,
+  "contributions_last_year": 396,
   "top_langs": [
     [
       "JavaScript",
@@ -21,7 +21,24 @@
     [
       "Batchfile",
       3
+    ],
+    [
+      "Rust",
+      1
+    ],
+    [
+      "Shell",
+      1
+    ],
+    [
+      "Java",
+      1
+    ],
+    [
+      "HTML",
+      1
     ]
   ],
-  "updated": "2026-07-11 06:27 UTC"
+  "updated": "2026-07-11 12:13 PM IST",
+  "source": "live"
 }
