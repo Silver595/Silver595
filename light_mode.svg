@@ -37,7 +37,7 @@
   <text x="190" y="326" class="mono statnum">31</text>
   <text x="190" y="348" class="mono statlabel">stars earned</text>
 
-  <text x="340" y="326" class="mono statnum">358</text>
+  <text x="340" y="326" class="mono statnum">359</text>
   <text x="340" y="348" class="mono statlabel">commits (this year)</text>
 
   <text x="540" y="326" class="mono statnum">50</text>
@@ -48,7 +48,7 @@
 
   <line x1="40" y1="378" x2="860" y2="378" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
 
-  <text x="40" y="406" class="mono muted">last synced 2026-07-11 06:13 UTC</text>
+  <text x="40" y="406" class="mono muted">last synced 2026-07-11 06:27 UTC</text>
   <circle cx="704" cy="401" r="5" fill="#1a7f37"/>
   <text x="716" y="406" class="mono muted">auto-updates 12h</text>
 </svg>
