@@ -1,0 +1,41 @@
+name: Update profile stats
+
+on:
+  schedule:
+    # Runs every 12 hours. GitHub Actions cron is UTC.
+    - cron: "0 */12 * * *"
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+  push:
+    branches: [ main ]    # re-render immediately when you edit today.py
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Generate stats + SVGs
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GH_USERNAME: Silver595
+        run: python3 today.py
+
+      - name: Commit updated files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add dark_mode.svg light_mode.svg cache/stats.json
+          git diff --quiet --cached || git commit -m "chore: refresh profile stats [skip ci]"
+          git push
