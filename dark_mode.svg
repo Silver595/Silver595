@@ -32,7 +32,7 @@
   <text x="44" y="338" class="mono label">live stats</text>
   <text x="44" y="380" class="mono statnum">27</text>
   <text x="44" y="402" class="mono statlabel">repositories</text>
-  <text x="194" y="380" class="mono statnum">31</text>
+  <text x="194" y="380" class="mono statnum">16</text>
   <text x="194" y="402" class="mono statlabel">stars earned</text>
   <text x="344" y="380" class="mono statnum">363</text>
   <text x="344" y="402" class="mono statlabel">commits (this yr)</text>
