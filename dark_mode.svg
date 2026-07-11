@@ -25,30 +25,30 @@
   <line x1="40" y1="176" x2="860" y2="176" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
 
   <text x="40" y="204" class="mono label">stack</text>
-  <text x="40" y="230" class="mono body">Python   ·   JavaScript   ·   Rust   ·   Shell</text>
+  <text x="40" y="230" class="mono body">JavaScript   ·   Python   ·   TypeScript   ·   Batchfile</text>
 
   <line x1="40" y1="256" x2="860" y2="256" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
 
   <text x="40" y="284" class="mono label">live stats</text>
 
-  <text x="40" y="326" class="mono statnum">30</text>
+  <text x="40" y="326" class="mono statnum">27</text>
   <text x="40" y="348" class="mono statlabel">repositories</text>
 
-  <text x="190" y="326" class="mono statnum">15</text>
+  <text x="190" y="326" class="mono statnum">31</text>
   <text x="190" y="348" class="mono statlabel">stars earned</text>
 
-  <text x="340" y="326" class="mono statnum">340</text>
+  <text x="340" y="326" class="mono statnum">356</text>
   <text x="340" y="348" class="mono statlabel">commits (this year)</text>
 
   <text x="540" y="326" class="mono statnum">50</text>
   <text x="540" y="348" class="mono statlabel">followers</text>
 
-  <text x="680" y="326" class="mono statnum">4</text>
+  <text x="680" y="326" class="mono statnum">10</text>
   <text x="680" y="348" class="mono statlabel">forks received</text>
 
   <line x1="40" y1="378" x2="860" y2="378" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
 
-  <text x="40" y="406" class="mono muted">last synced 2026-07-11 12:00 UTC</text>
+  <text x="40" y="406" class="mono muted">last synced 2026-07-11 06:00 UTC</text>
   <circle cx="704" cy="401" r="5" fill="#98c379"/>
   <text x="716" y="406" class="mono muted">auto-updates 12h</text>
 </svg>
