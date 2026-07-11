@@ -1,0 +1,54 @@
+<svg width="900" height="460" viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+    .name { font-size: 30px; fill: #e6e9ef; }
+    .alias { font-size: 18px; fill: #7aa2f7; }
+    .muted { font-size: 15px; fill: #7d8590; }
+    .label { font-size: 15px; fill: #565f78; }
+    .body { font-size: 16px; fill: #c8cdd8; }
+    .statnum { font-size: 26px; fill: #e5c07b; }
+    .statlabel { font-size: 13px; fill: #565f78; }
+    .key { font-size: 16px; fill: #7aa2f7; }
+  </style>
+
+  <rect x="0.5" y="0.5" width="899" height="459" rx="12" fill="#0b0e14" stroke="#1c2230" stroke-width="1"/>
+
+  <circle cx="34" cy="34" r="6" fill="#e06c75"/>
+  <circle cx="56" cy="34" r="6" fill="#e5c07b"/>
+  <circle cx="78" cy="34" r="6" fill="#98c379"/>
+  <text x="860" y="39" text-anchor="end" class="mono muted">~/silver595</text>
+
+  <text x="40" y="94" class="mono name">Akash</text>
+  <text x="40" y="122" class="mono alias">aka silver</text>
+  <text x="40" y="150" class="mono muted">Pune, India</text>
+
+  <line x1="40" y1="176" x2="860" y2="176" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <text x="40" y="204" class="mono label">stack</text>
+  <text x="40" y="230" class="mono body">JavaScript   ·   Python   ·   TypeScript   ·   Batchfile</text>
+
+  <line x1="40" y1="256" x2="860" y2="256" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <text x="40" y="284" class="mono label">live stats</text>
+
+  <text x="40" y="326" class="mono statnum">27</text>
+  <text x="40" y="348" class="mono statlabel">repositories</text>
+
+  <text x="190" y="326" class="mono statnum">31</text>
+  <text x="190" y="348" class="mono statlabel">stars earned</text>
+
+  <text x="340" y="326" class="mono statnum">355</text>
+  <text x="340" y="348" class="mono statlabel">commits (this year)</text>
+
+  <text x="540" y="326" class="mono statnum">50</text>
+  <text x="540" y="348" class="mono statlabel">followers</text>
+
+  <text x="680" y="326" class="mono statnum">10</text>
+  <text x="680" y="348" class="mono statlabel">forks received</text>
+
+  <line x1="40" y1="378" x2="860" y2="378" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <text x="40" y="406" class="mono muted">last synced 2026-07-11 05:58 UTC</text>
+  <circle cx="704" cy="401" r="5" fill="#98c379"/>
+  <text x="716" y="406" class="mono muted">auto-updates 12h</text>
+</svg>
