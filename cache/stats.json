@@ -1,10 +1,10 @@
 {
   "repos": 27,
   "followers": 50,
-  "stars": 31,
+  "stars": 4,
   "forks": 10,
   "commits": 357,
-  "contributions_last_year": 393,
+  "contributions_last_year": 204,
   "top_langs": [
     [
       "JavaScript",
@@ -16,10 +16,6 @@
     ],
     [
       "TypeScript",
-      3
-    ],
-    [
-      "Batchfile",
       3
     ]
   ],
