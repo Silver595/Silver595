@@ -1,21 +1,4 @@
 #!/usr/bin/env python3
-"""
-today.py — pulls live GitHub stats for a user and renders them into two
-hand-designed SVG cards (dark_mode.svg / light_mode.svg) for use as a
-GitHub profile README header.
-
-Inspired by the automation pattern used in Andrew6rant/Andrew6rant, but
-with an original script and an original card design.
-
-Requires:
-    - env var ACCESS_TOKEN: a GitHub personal access token with `repo`
-      and `read:user` scopes (stored as a repo secret, injected by the
-      Actions workflow).
-    - env var GITHUB_ACTOR (optional): defaults to USERNAME below if unset.
-
-Run locally:
-    ACCESS_TOKEN=ghp_xxx python3 today.py
-"""
 
 import os
 import json
@@ -29,17 +12,12 @@ IST = ZoneInfo("Asia/Kolkata")
 def now_ist_string():
     return datetime.datetime.now(IST).strftime("%Y-%m-%d %I:%M %p IST")
 
-# ---------------------------------------------------------------------------
-# Config — edit these for your own profile
-# ---------------------------------------------------------------------------
 USERNAME = os.environ.get("GH_USERNAME", "Silver595")
 DISPLAY_NAME = "Akash"
 ALIAS = "aka silver"
 LOCATION = "Pune, India"
 CACHE_PATH = "cache/stats.json"
 
-# Item 5 — contact / links section. Edit these directly; leave value ""
-# to skip a row entirely (e.g. no twitter yet).
 CONTACTS = [
     ("email",     "akashpurjalkar@gmail.com"),
     ("github",    "github.com/Silver595"),
@@ -52,9 +30,7 @@ GITHUB_API = "https://api.github.com/graphql"
 TOKEN = os.environ.get("ACCESS_TOKEN")
 HEADERS = {"Authorization": f"bearer {TOKEN}"} if TOKEN else {}
 
-# ---------------------------------------------------------------------------
-# GraphQL query — pulls repos, stars, followers, and contribution totals
-# in a single round trip instead of hammering the REST API per-repo.
+
 # ---------------------------------------------------------------------------
 QUERY = """
 query($login: String!) {
