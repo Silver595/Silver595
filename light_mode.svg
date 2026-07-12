@@ -1,4 +1,4 @@
-<svg width="1000" height="620" viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">
+<svg width="1000" height="644" viewBox="0 0 1000 644" xmlns="http://www.w3.org/2000/svg">
   <style>
     .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
     .name { font-size: 32px; fill: #1c2230; }
@@ -12,7 +12,7 @@
     .val { font-size: 16px; fill: #24292f; }
   </style>
 
-  <rect x="0.5" y="0.5" width="999" height="619" rx="14" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+  <rect x="0.5" y="0.5" width="999" height="643" rx="14" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
 
   <circle cx="36" cy="36" r="6" fill="#e06c75"/>
   <circle cx="58" cy="36" r="6" fill="#e5c07b"/>
@@ -25,31 +25,59 @@
 
   <line x1="44" y1="186" x2="956" y2="186" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
 
-  <text x="44" y="214" class="mono label">stack</text>
-  <text x="44" y="240" class="mono body">JavaScript   ·   Python   ·   TypeScript   ·   Batchfile   ·   Rust   ·   Shell</text>
-  <text x="44" y="266" class="mono body">Java   ·   HTML</text>
-  <line x1="44" y1="310" x2="956" y2="310" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
-  <text x="44" y="338" class="mono label">live stats</text>
-  <text x="44" y="380" class="mono statnum">27</text>
-  <text x="44" y="402" class="mono statlabel">repositories</text>
-  <text x="194" y="380" class="mono statnum">31</text>
-  <text x="194" y="402" class="mono statlabel">stars earned</text>
-  <text x="344" y="380" class="mono statnum">365</text>
-  <text x="344" y="402" class="mono statlabel">commits (this yr)</text>
-  <text x="554" y="380" class="mono statnum">51</text>
-  <text x="554" y="402" class="mono statlabel">followers</text>
-  <text x="704" y="380" class="mono statnum">10</text>
-  <text x="704" y="402" class="mono statlabel">forks received</text>
-  <line x1="44" y1="432" x2="956" y2="432" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
-  <text x="44" y="460" class="mono label">connect</text>
-  <text x="44" y="492" class="mono key">email</text>
-  <text x="200" y="492" class="mono val">akashpurjalkar@gmail.com</text>
-  <text x="44" y="522" class="mono key">github</text>
-  <text x="200" y="522" class="mono val">github.com/Silver595</text>
-  <text x="44" y="552" class="mono key">portfolio</text>
-  <text x="200" y="552" class="mono val">akashpurjalkar.online</text>
-  <line x1="44" y1="586" x2="956" y2="586" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
-  <text x="44" y="614" class="mono muted">last synced 2026-07-12 09:01 AM IST</text>
-  <circle cx="794" cy="609" r="5" fill="#1a7f37"/>
-  <text x="806" y="614" class="mono muted">live</text>
+  <text x="44" y="214" class="mono label">skills</text>
+  <rect x="44" y="234" width="75" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="62" cy="249" r="5" fill="#FF9900"/>
+  <text x="76" y="254" class="mono body" style="font-size:14px">AWS</text>
+  <rect x="129" y="234" width="102" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="147" cy="249" r="5" fill="#2496ED"/>
+  <text x="161" y="254" class="mono body" style="font-size:14px">Docker</text>
+  <rect x="241" y="234" width="138" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="259" cy="249" r="5" fill="#326CE5"/>
+  <text x="273" y="254" class="mono body" style="font-size:14px">Kubernetes</text>
+  <rect x="389" y="234" width="93" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="407" cy="249" r="5" fill="#FCC624"/>
+  <text x="421" y="254" class="mono body" style="font-size:14px">Linux</text>
+  <rect x="492" y="234" width="138" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="510" cy="249" r="5" fill="#F7DF1E"/>
+  <text x="524" y="254" class="mono body" style="font-size:14px">JavaScript</text>
+  <rect x="44" y="274" width="102" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="62" cy="289" r="5" fill="#3776AB"/>
+  <text x="76" y="294" class="mono body" style="font-size:14px">Python</text>
+  <rect x="156" y="274" width="129" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="174" cy="289" r="5" fill="#7B42BC"/>
+  <text x="188" y="294" class="mono body" style="font-size:14px">Terraform</text>
+  <rect x="295" y="274" width="84" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="313" cy="289" r="5" fill="#EA2D2E"/>
+  <text x="327" y="294" class="mono body" style="font-size:14px">Java</text>
+  <rect x="389" y="274" width="93" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="407" cy="289" r="5" fill="#61DAFB"/>
+  <text x="421" y="294" class="mono body" style="font-size:14px">React</text>
+  <rect x="492" y="274" width="156" height="30" rx="15" fill="#d0d7de" opacity="0.5"/>
+  <circle cx="510" cy="289" r="5" fill="#89E051"/>
+  <text x="524" y="294" class="mono body" style="font-size:14px">Shell Script</text>
+  <line x1="44" y1="318" x2="956" y2="318" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="44" y="346" class="mono label">live stats</text>
+  <text x="44" y="388" class="mono statnum">27</text>
+  <text x="44" y="410" class="mono statlabel">repositories</text>
+  <text x="194" y="388" class="mono statnum">31</text>
+  <text x="194" y="410" class="mono statlabel">stars earned</text>
+  <text x="344" y="388" class="mono statnum">366</text>
+  <text x="344" y="410" class="mono statlabel">commits (this yr)</text>
+  <text x="554" y="388" class="mono statnum">51</text>
+  <text x="554" y="410" class="mono statlabel">followers</text>
+  <text x="704" y="388" class="mono statnum">10</text>
+  <text x="704" y="410" class="mono statlabel">forks received</text>
+  <line x1="44" y1="440" x2="956" y2="440" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="44" y="468" class="mono label">connect</text>
+  <text x="44" y="500" class="mono key">email</text>
+  <text x="200" y="500" class="mono val">akashpurjalkar@gmail.com</text>
+  <text x="44" y="530" class="mono key">github</text>
+  <text x="200" y="530" class="mono val">github.com/Silver595</text>
+  <text x="44" y="560" class="mono key">portfolio</text>
+  <text x="200" y="560" class="mono val">akashpurjalkar.online</text>
+  <line x1="44" y1="594" x2="956" y2="594" stroke="#e8ecef" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="44" y="622" class="mono muted">last synced 2026-07-12 03:06 PM IST</text>
+  <circle cx="794" cy="617" r="5" fill="#1a7f37"/>
+  <text x="806" y="622" class="mono muted">live</text>
 </svg>
