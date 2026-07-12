@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 import os
 import json
 import datetime
@@ -12,12 +13,30 @@ IST = ZoneInfo("Asia/Kolkata")
 def now_ist_string():
     return datetime.datetime.now(IST).strftime("%Y-%m-%d %I:%M %p IST")
 
+# ---------------------------------------------------------------------------
+# Config — edit these for your own profile
+# ---------------------------------------------------------------------------
 USERNAME = os.environ.get("GH_USERNAME", "Silver595")
 DISPLAY_NAME = "Akash"
 ALIAS = "aka silver"
 LOCATION = "Pune, India"
 CACHE_PATH = "cache/stats.json"
 
+SKILLS = [
+    ("AWS",         "#FF9900"),
+    ("Docker",      "#2496ED"),
+    ("Kubernetes",  "#326CE5"),
+    ("Linux",       "#FCC624"),
+    ("JavaScript",  "#F7DF1E"),
+    ("Python",      "#3776AB"),
+    ("Terraform",   "#7B42BC"),
+    ("Java",        "#EA2D2E"),
+    ("React",       "#61DAFB"),
+    ("Shell Script","#89E051"),
+]
+
+# Contact / links section. Edit these directly; leave value "" to skip
+# a row entirely (e.g. no twitter yet).
 CONTACTS = [
     ("email",     "akashpurjalkar@gmail.com"),
     ("github",    "github.com/Silver595"),
@@ -30,7 +49,9 @@ GITHUB_API = "https://api.github.com/graphql"
 TOKEN = os.environ.get("ACCESS_TOKEN")
 HEADERS = {"Authorization": f"bearer {TOKEN}"} if TOKEN else {}
 
-
+# ---------------------------------------------------------------------------
+# GraphQL query — pulls repos, stars, followers, and contribution totals
+# in a single round trip instead of hammering the REST API per-repo.
 # ---------------------------------------------------------------------------
 QUERY = """
 query($login: String!) {
@@ -164,15 +185,13 @@ THEMES = {
 }
 
 def compute_height(stats):
-    """Height depends on how many language-lines wrap and how many
-    contact rows are visible (items 4 + 5 both add variable-length
-    content), so the canvas is sized to fit instead of hardcoded."""
-    lang_names = [name for name, _ in stats["top_langs"]] or ["—"]
-    n_lang_lines = len(wrap_items(lang_names, max_per_line=6))
+    """Height depends on how many skill-chip rows wrap and how many
+    contact rows are visible, so the canvas fits content exactly."""
+    n_skill_lines = len(wrap_skills(SKILLS, max_per_line=5))
     n_contacts = len([1 for _, v in CONTACTS if v])
 
     y = 186                                          # header -> first rule
-    y += 26 + (n_lang_lines - 1) * 26 + 18            # stack lines -> rule2
+    y += 40 + (n_skill_lines - 1) * 40 + 14           # skill chip rows -> rule2
     y += 28 + 42 + 22 + 30                            # stats block -> rule3
     y += 28 + 32 + max(n_contacts, 1) * 30 + 4        # connect block -> rule4
     y += 28 + 60                                      # footer text + generous bottom margin
@@ -182,12 +201,11 @@ def compute_height(stats):
 WIDTH = 1000
 
 
-def wrap_items(items, max_per_line=6):
-    """Split a list of language names into lines for wrapping instead of
-    overflowing the card edge when the list grows (item 4)."""
+def wrap_skills(skills, max_per_line=5):
+    """Split the fixed SKILLS list into rows for the chip grid."""
     lines, current = [], []
-    for i, name in enumerate(items):
-        current.append(name)
+    for name, color in skills:
+        current.append((name, color))
         if len(current) == max_per_line:
             lines.append(current)
             current = []
@@ -196,11 +214,15 @@ def wrap_items(items, max_per_line=6):
     return lines
 
 
+def chip_width(name):
+    # rough monospace width estimate: dot + gap + text, padded
+    return 22 + len(name) * 9 + 26
+
+
 def render_svg(stats, theme_name):
     t = THEMES[theme_name]
     HEIGHT = compute_height(stats)
-    lang_names = [name for name, _ in stats["top_langs"]] or ["—"]
-    lang_lines = wrap_items(lang_names, max_per_line=6)
+    skill_lines = wrap_skills(SKILLS, max_per_line=5)
 
     is_live = stats.get("source") == "live"
     status_color = t["accent_green"] if is_live else "#e06c75"
@@ -233,15 +255,21 @@ def render_svg(stats, theme_name):
 
   <line x1="44" y1="186" x2="{WIDTH-44}" y2="186" stroke="{t['divider']}" stroke-width="1" stroke-dasharray="4 4"/>
 
-  <text x="44" y="214" class="mono label">stack</text>''']
+  <text x="44" y="214" class="mono label">skills</text>''']
 
-    # --- item 4: wrapped, unlimited-length language block ---
-    y = 240
-    for line in lang_lines:
-        parts.append(f'  <text x="44" y="{y}" class="mono body">{"   ·   ".join(line)}</text>')
-        y += 26
+    # --- fixed skills grid, rendered as colored chips ---
+    y = 234
+    for line in skill_lines:
+        x = 44
+        for name, color in line:
+            w = chip_width(name)
+            parts.append(f'  <rect x="{x}" y="{y}" width="{w}" height="30" rx="15" fill="{t["card_stroke"]}" opacity="0.5"/>')
+            parts.append(f'  <circle cx="{x+18}" cy="{y+15}" r="5" fill="{color}"/>')
+            parts.append(f'  <text x="{x+32}" y="{y+20}" class="mono body" style="font-size:14px">{name}</text>')
+            x += w + 10
+        y += 40
 
-    rule2_y = y + 18
+    rule2_y = y + 4
     parts.append(f'  <line x1="44" y1="{rule2_y}" x2="{WIDTH-44}" y2="{rule2_y}" stroke="{t["divider"]}" stroke-width="1" stroke-dasharray="4 4"/>')
 
     stats_label_y = rule2_y + 28
