@@ -58,15 +58,15 @@
   <text x="524" y="294" class="mono body" style="font-size:14px">Shell Script</text>
   <line x1="44" y1="318" x2="956" y2="318" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
   <text x="44" y="346" class="mono label">live stats</text>
-  <text x="44" y="388" class="mono statnum">27</text>
+  <text x="44" y="388" class="mono statnum">30</text>
   <text x="44" y="410" class="mono statlabel">repositories</text>
-  <text x="194" y="388" class="mono statnum">31</text>
+  <text x="194" y="388" class="mono statnum">15</text>
   <text x="194" y="410" class="mono statlabel">stars earned</text>
-  <text x="344" y="388" class="mono statnum">366</text>
+  <text x="344" y="388" class="mono statnum">340</text>
   <text x="344" y="410" class="mono statlabel">commits (this yr)</text>
-  <text x="554" y="388" class="mono statnum">51</text>
+  <text x="554" y="388" class="mono statnum">50</text>
   <text x="554" y="410" class="mono statlabel">followers</text>
-  <text x="704" y="388" class="mono statnum">10</text>
+  <text x="704" y="388" class="mono statnum">4</text>
   <text x="704" y="410" class="mono statlabel">forks received</text>
   <line x1="44" y1="440" x2="956" y2="440" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
   <text x="44" y="468" class="mono label">connect</text>
@@ -77,7 +77,7 @@
   <text x="44" y="560" class="mono key">portfolio</text>
   <text x="200" y="560" class="mono val">akashpurjalkar.online</text>
   <line x1="44" y1="594" x2="956" y2="594" stroke="#1c2230" stroke-width="1" stroke-dasharray="4 4"/>
-  <text x="44" y="622" class="mono muted">last synced 2026-07-12 03:06 PM IST</text>
-  <circle cx="794" cy="617" r="5" fill="#98c379"/>
-  <text x="806" y="622" class="mono muted">live</text>
+  <text x="44" y="622" class="mono muted">last synced 2026-07-11 06:30 PM IST</text>
+  <circle cx="794" cy="617" r="5" fill="#e06c75"/>
+  <text x="806" y="622" class="mono muted">cached (no token)</text>
 </svg>
