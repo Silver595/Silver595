@@ -28,7 +28,8 @@ jobs:
 
       - name: Generate stats + SVGs
         env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN || github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           GH_USERNAME: Silver595
         run: python3 today.py
 

@@ -46,8 +46,14 @@ CONTACTS = [
 ]
 
 GITHUB_API = "https://api.github.com/graphql"
-TOKEN = os.environ.get("ACCESS_TOKEN")
-HEADERS = {"Authorization": f"bearer {TOKEN}"} if TOKEN else {}
+REST_API = "https://api.github.com"
+TOKEN = os.environ.get("ACCESS_TOKEN") or os.environ.get("GITHUB_TOKEN")
+HEADERS = {
+    "Accept": "application/vnd.github+json",
+    "User-Agent": f"{USERNAME}-profile-stats",
+}
+if TOKEN:
+    HEADERS["Authorization"] = "Bearer " + TOKEN
 
 # ---------------------------------------------------------------------------
 # GraphQL query — pulls repos, stars, followers, and contribution totals
@@ -86,10 +92,14 @@ def fetch_stats():
     but the SVG will visibly say 'cached' instead of silently pretending
     to be live, so a broken token is obvious at a glance."""
     if not TOKEN:
-        print("::warning::No ACCESS_TOKEN set — falling back to cache.")
-        stats = load_cache()
-        stats["source"] = "cached (no token)"
-        return stats
+        print("::warning::No token set — using public API fallback.")
+        try:
+            return fetch_stats_public()
+        except Exception as public_err:
+            print(f"::error::Public API fallback failed ({public_err}) — falling back to cache.")
+            stats = load_cache()
+            stats["source"] = "cached (no token)"
+            return stats
 
     try:
         resp = requests.post(
@@ -104,7 +114,9 @@ def fetch_stats():
         if "errors" in payload:
             raise RuntimeError(payload["errors"])
 
-        data = payload["data"]["user"]
+        data = payload.get("data", {}).get("user")
+        if not data:
+            raise RuntimeError("No user data returned from GraphQL API")
 
         repos = data["repositories"]["nodes"]
         total_stars = sum(r["stargazers"]["totalCount"] for r in repos)
@@ -140,10 +152,68 @@ def fetch_stats():
         return stats
 
     except Exception as e:
-        print(f"::error::Live fetch failed ({e}) — falling back to cache.")
-        stats = load_cache()
-        stats["source"] = f"cached (fetch failed)"
-        return stats
+        print(f"::error::GraphQL fetch failed ({e}) — trying public API fallback.")
+        try:
+            return fetch_stats_public()
+        except Exception as public_err:
+            print(f"::error::Public API fallback failed ({public_err}) — falling back to cache.")
+            stats = load_cache()
+            stats["source"] = "cached (fetch failed)"
+            return stats
+
+
+def fetch_stats_public():
+    """Fetch public profile stats without GraphQL auth scopes."""
+    user_resp = requests.get(f"{REST_API}/users/{USERNAME}", headers=HEADERS, timeout=15)
+    user_resp.raise_for_status()
+    user = user_resp.json()
+
+    repos = []
+    page = 1
+    while True:
+        repos_resp = requests.get(
+            f"{REST_API}/users/{USERNAME}/repos",
+            params={
+                "type": "owner",
+                "sort": "updated",
+                "per_page": 100,
+                "page": page,
+            },
+            headers=HEADERS,
+            timeout=15,
+        )
+        repos_resp.raise_for_status()
+        batch = repos_resp.json()
+        if not batch:
+            break
+        repos.extend(batch)
+        if len(batch) < 100:
+            break
+        page += 1
+
+    total_stars = sum(r.get("stargazers_count", 0) for r in repos)
+    total_forks = sum(r.get("forks_count", 0) for r in repos)
+
+    lang_counts = {}
+    for r in repos:
+        lang = r.get("language")
+        if lang:
+            lang_counts[lang] = lang_counts.get(lang, 0) + 1
+    top_langs = sorted(lang_counts.items(), key=lambda kv: -kv[1])
+
+    stats = {
+        "repos": user.get("public_repos", len(repos)),
+        "followers": user.get("followers", 0),
+        "stars": total_stars,
+        "forks": total_forks,
+        "commits": 0,
+        "contributions_last_year": 0,
+        "top_langs": top_langs,
+        "updated": now_ist_string(),
+        "source": "live (public API)",
+    }
+    save_cache(stats)
+    return stats
 
 
 def load_cache():
