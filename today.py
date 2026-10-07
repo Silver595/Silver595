@@ -201,19 +201,49 @@ def fetch_stats_public():
             lang_counts[lang] = lang_counts.get(lang, 0) + 1
     top_langs = sorted(lang_counts.items(), key=lambda kv: -kv[1])
 
+    commit_count, commit_count_source = fetch_public_commit_count()
+
     stats = {
         "repos": user.get("public_repos", len(repos)),
         "followers": user.get("followers", 0),
         "stars": total_stars,
         "forks": total_forks,
-        "commits": 0,
+        "commits": commit_count,
         "contributions_last_year": 0,
         "top_langs": top_langs,
         "updated": now_ist_string(),
-        "source": "live (public API)",
+        "source": f"live (public API, {commit_count_source})",
     }
     save_cache(stats)
     return stats
+
+
+def fetch_public_commit_count():
+    """Best-effort public commit count for the current year via REST search."""
+    now_ist = datetime.datetime.now(IST).date()
+    year_start = now_ist.replace(month=1, day=1)
+    query = f"author:{USERNAME} committer-date:{year_start.isoformat()}..{now_ist.isoformat()}"
+
+    headers = dict(HEADERS)
+    # Commit search historically used a preview media type; keep it for compatibility.
+    headers["Accept"] = "application/vnd.github.cloak-preview+json"
+
+    try:
+        resp = requests.get(
+            f"{REST_API}/search/commits",
+            params={"q": query, "per_page": 1},
+            headers=headers,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        count = int(data.get("total_count", 0))
+        if count >= 1000:
+            print("::warning::Commit search capped at 1000 by GitHub Search API.")
+        return count, "commit search"
+    except Exception as e:
+        print(f"::warning::Public commit search failed ({e}); using 0 commits.")
+        return 0, "commit search unavailable"
 
 
 def load_cache():
