@@ -1,18 +1,18 @@
 {
-  "repos": 27,
-  "followers": 43,
-  "stars": 31,
-  "forks": 10,
-  "commits": 481,
-  "contributions_last_year": 586,
+  "repos": 34,
+  "followers": 49,
+  "stars": 33,
+  "forks": 9,
+  "commits": 0,
+  "contributions_last_year": 0,
   "top_langs": [
     [
       "JavaScript",
-      9
+      11
     ],
     [
       "Python",
-      7
+      8
     ],
     [
       "TypeScript",
@@ -23,11 +23,15 @@
       3
     ],
     [
-      "Rust",
+      "HTML",
+      2
+    ],
+    [
+      "C",
       1
     ],
     [
-      "Shell",
+      "HCL",
       1
     ],
     [
@@ -35,10 +39,14 @@
       1
     ],
     [
-      "HTML",
+      "Shell",
+      1
+    ],
+    [
+      "Rust",
       1
     ]
   ],
-  "updated": "2026-07-22 08:50 AM IST",
-  "source": "live"
+  "updated": "2026-10-07 09:35 AM IST",
+  "source": "live (public API)"
 }
