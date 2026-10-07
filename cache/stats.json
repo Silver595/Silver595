@@ -3,8 +3,8 @@
   "followers": 49,
   "stars": 33,
   "forks": 9,
-  "commits": 0,
-  "contributions_last_year": 0,
+  "commits": 354,
+  "contributions_last_year": 608,
   "top_langs": [
     [
       "JavaScript",
@@ -47,6 +47,6 @@
       1
     ]
   ],
-  "updated": "2026-10-07 09:35 AM IST",
-  "source": "live (public API)"
+  "updated": "2026-10-07 10:07 AM IST",
+  "source": "live (public API, commit search, contrib calendar)"
 }
