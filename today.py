@@ -4,6 +4,7 @@
 import os
 import json
 import datetime
+import re
 from zoneinfo import ZoneInfo
 import requests
 
@@ -202,6 +203,7 @@ def fetch_stats_public():
     top_langs = sorted(lang_counts.items(), key=lambda kv: -kv[1])
 
     commit_count, commit_count_source = fetch_public_commit_count()
+    contributions_last_year, contrib_source = fetch_public_contributions_last_year()
 
     stats = {
         "repos": user.get("public_repos", len(repos)),
@@ -209,10 +211,10 @@ def fetch_stats_public():
         "stars": total_stars,
         "forks": total_forks,
         "commits": commit_count,
-        "contributions_last_year": 0,
+        "contributions_last_year": contributions_last_year,
         "top_langs": top_langs,
         "updated": now_ist_string(),
-        "source": f"live (public API, {commit_count_source})",
+        "source": f"live (public API, {commit_count_source}, {contrib_source})",
     }
     save_cache(stats)
     return stats
@@ -244,6 +246,39 @@ def fetch_public_commit_count():
     except Exception as e:
         print(f"::warning::Public commit search failed ({e}); using 0 commits.")
         return 0, "commit search unavailable"
+
+
+def fetch_public_contributions_last_year():
+    """Best-effort public total contributions for the last 365 days."""
+    to_date = datetime.datetime.now(IST).date()
+    from_date = to_date - datetime.timedelta(days=365)
+
+    try:
+        resp = requests.get(
+            f"https://github.com/users/{USERNAME}/contributions",
+            params={"from": from_date.isoformat(), "to": to_date.isoformat()},
+            headers=HEADERS,
+            timeout=20,
+        )
+        resp.raise_for_status()
+        html = resp.text
+        counts = [int(x) for x in re.findall(r">(\d+) contributions? on [^<]+<", html)]
+        if counts:
+            return sum(counts), "contrib calendar"
+
+        # fallback: read visible summary number if tooltip format changes
+        m = re.search(
+            r'id="js-contribution-activity-description"[\s\S]*?>\s*([\d,]+)\s*\n\s*contributions?',
+            html,
+        )
+        if m:
+            return int(m.group(1).replace(",", "")), "contrib header"
+
+        print("::warning::Could not parse public contributions calendar.")
+        return 0, "contrib parse unavailable"
+    except Exception as e:
+        print(f"::warning::Public contributions fetch failed ({e}); using 0 contributions.")
+        return 0, "contrib fetch unavailable"
 
 
 def load_cache():
