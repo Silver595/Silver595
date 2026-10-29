@@ -1,10 +1,10 @@
 {
-  "repos": 35,
+  "repos": 36,
   "followers": 49,
   "stars": 33,
   "forks": 9,
-  "commits": 460,
-  "contributions_last_year": 1093,
+  "commits": 464,
+  "contributions_last_year": 1098,
   "top_langs": [
     [
       "JavaScript",
@@ -16,7 +16,7 @@
     ],
     [
       "TypeScript",
-      4
+      5
     ],
     [
       "Batchfile",
@@ -47,6 +47,6 @@
       1
     ]
   ],
-  "updated": "2026-10-28 11:42 PM IST",
+  "updated": "2026-10-29 10:47 AM IST",
   "source": "live (public API, commit search, contrib calendar)"
 }
