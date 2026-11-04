@@ -1,5 +1,5 @@
 {
-  "repos": 36,
+  "repos": 35,
   "followers": 51,
   "stars": 33,
   "forks": 9,
@@ -16,7 +16,7 @@
     ],
     [
       "TypeScript",
-      5
+      4
     ],
     [
       "Batchfile",
@@ -47,6 +47,6 @@
       1
     ]
   ],
-  "updated": "2026-11-04 11:16 AM IST",
+  "updated": "2026-11-05 01:07 AM IST",
   "source": "live (public API, commit search, contrib calendar)"
 }
