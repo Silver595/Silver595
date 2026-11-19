@@ -1,42 +1,47 @@
-name: Update profile stats
+name: Refresh profile README
 
 on:
   schedule:
-    # Runs every 12 hours. GitHub Actions cron is UTC.
-    - cron: "0 */12 * * *"
-  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+    - cron: "17 */8 * * *"
+  workflow_dispatch:
   push:
-    branches: [ main ]    # re-render immediately when you edit today.py
+    branches: [main]
+    paths:
+      - today.py
+      - .github/workflows/update-stats.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-readme-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
-  update-readme:
+  refresh:
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    timeout-minutes: 5
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install requests
-
-      - name: Generate stats + SVGs
+      - name: Generate README and activity cards
         env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN || github.token }}
-          GITHUB_TOKEN: ${{ github.token }}
-          GH_USERNAME: Silver595
+          GH_USERNAME: ${{ github.repository_owner }}
         run: python3 today.py
 
-      - name: Commit updated files
+      - name: Publish changed files
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add dark_mode.svg light_mode.svg cache/stats.json
-          git diff --quiet --cached || git commit -m "chore: refresh profile stats [skip ci]"
+          git add README.md dark_mode.svg light_mode.svg
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: refresh profile README'
           git push

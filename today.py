@@ -1,462 +1,200 @@
 #!/usr/bin/env python3
+"""Generate the profile README and activity cards from public GitHub data."""
 
-
-import os
+import argparse
+from datetime import date, datetime, timedelta, timezone
+from html import escape
+from html.parser import HTMLParser
 import json
-import datetime
+import os
+from pathlib import Path
 import re
-from zoneinfo import ZoneInfo
-import requests
-
-IST = ZoneInfo("Asia/Kolkata")
+from urllib.parse import urlsplit
+from urllib.request import Request, urlopen
 
 
-def now_ist_string():
-    return datetime.datetime.now(IST).strftime("%Y-%m-%d %I:%M %p IST")
-
-# ---------------------------------------------------------------------------
-# Config — edit these for your own profile
-# ---------------------------------------------------------------------------
-USERNAME = os.environ.get("GH_USERNAME", "Silver595")
-DISPLAY_NAME = "Akash"
-ALIAS = "aka silver"
-LOCATION = "Pune, India"
-CACHE_PATH = "cache/stats.json"
-
-SKILLS = [
-    ("AWS",         "#FF9900"),
-    ("Docker",      "#2496ED"),
-    ("Kubernetes",  "#326CE5"),
-    ("Linux",       "#FCC624"),
-    ("JavaScript",  "#F7DF1E"),
-    ("Python",      "#3776AB"),
-    ("Terraform",   "#7B42BC"),
-    ("Java",        "#EA2D2E"),
-    ("React",       "#61DAFB"),
-    ("Shell Script","#89E051"),
-]
-
-# Contact / links section. Edit these directly; leave value "" to skip
-# a row entirely (e.g. no twitter yet).
-CONTACTS = [
-    ("email",     "akashpurjalkar@gmail.com"),
-    ("github",    "github.com/Silver595"),
-    ("linkedin",  ""),          # e.g. "linkedin.com/in/yourhandle"
-    ("portfolio", "akashpurjalkar.online"),
-    ("project",   ""),          # optional — e.g. a flagship project URL
-]
-
-GITHUB_API = "https://api.github.com/graphql"
-REST_API = "https://api.github.com"
-TOKEN = os.environ.get("ACCESS_TOKEN") or os.environ.get("GITHUB_TOKEN")
-HEADERS = {
-    "Accept": "application/vnd.github+json",
-    "User-Agent": f"{USERNAME}-profile-stats",
-}
-if TOKEN:
-    HEADERS["Authorization"] = "Bearer " + TOKEN
-
-# ---------------------------------------------------------------------------
-# GraphQL query — pulls repos, stars, followers, and contribution totals
-# in a single round trip instead of hammering the REST API per-repo.
-# ---------------------------------------------------------------------------
-QUERY = """
-query($login: String!) {
-  user(login: $login) {
-    followers { totalCount }
-    repositories(first: 100, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC) {
-      totalCount
-      nodes {
-        name
-        stargazers { totalCount }
-        forkCount
-        primaryLanguage { name }
-      }
-    }
-    contributionsCollection {
-      totalCommitContributions
-      restrictedContributionsCount
-      contributionCalendar {
-        totalContributions
-      }
-    }
-    pullRequests(first: 1) { totalCount }
-    issues(first: 1) { totalCount }
-  }
-}
-"""
-
-
-def fetch_stats():
-    """Query GitHub's GraphQL API for live stats. Falls back to cached
-    values on any failure so the workflow never breaks the README —
-    but the SVG will visibly say 'cached' instead of silently pretending
-    to be live, so a broken token is obvious at a glance."""
-    if not TOKEN:
-        print("::warning::No token set — using public API fallback.")
-        try:
-            return fetch_stats_public()
-        except Exception as public_err:
-            print(f"::error::Public API fallback failed ({public_err}) — falling back to cache.")
-            stats = load_cache()
-            stats["source"] = "cached (no token)"
-            return stats
-
-    try:
-        resp = requests.post(
-            GITHUB_API,
-            json={"query": QUERY, "variables": {"login": USERNAME}},
-            headers=HEADERS,
-            timeout=15,
-        )
-        resp.raise_for_status()
-        payload = resp.json()
-
-        if "errors" in payload:
-            raise RuntimeError(payload["errors"])
-
-        data = payload.get("data", {}).get("user")
-        if not data:
-            raise RuntimeError("No user data returned from GraphQL API")
-
-        repos = data["repositories"]["nodes"]
-        total_stars = sum(r["stargazers"]["totalCount"] for r in repos)
-        total_forks = sum(r["forkCount"] for r in repos)
-
-        lang_counts = {}
-        for r in repos:
-            lang = r["primaryLanguage"]["name"] if r["primaryLanguage"] else None
-            if lang:
-                lang_counts[lang] = lang_counts.get(lang, 0) + 1
-        # NOTE: item 4 — no hard cap here anymore. All languages found are
-        # kept, sorted by frequency; render_svg() decides how many fit.
-        top_langs = sorted(lang_counts.items(), key=lambda kv: -kv[1])
-
-        contrib = data["contributionsCollection"]
-        total_commits = (
-            contrib["totalCommitContributions"]
-            + contrib["restrictedContributionsCount"]
-        )
-
-        stats = {
-            "repos": data["repositories"]["totalCount"],
-            "followers": data["followers"]["totalCount"],
-            "stars": total_stars,
-            "forks": total_forks,
-            "commits": total_commits,
-            "contributions_last_year": contrib["contributionCalendar"]["totalContributions"],
-            "top_langs": top_langs,
-            "updated": now_ist_string(),
-            "source": "live",
-        }
-        save_cache(stats)
-        return stats
-
-    except Exception as e:
-        print(f"::error::GraphQL fetch failed ({e}) — trying public API fallback.")
-        try:
-            return fetch_stats_public()
-        except Exception as public_err:
-            print(f"::error::Public API fallback failed ({public_err}) — falling back to cache.")
-            stats = load_cache()
-            stats["source"] = "cached (fetch failed)"
-            return stats
-
-
-def fetch_stats_public():
-    """Fetch public profile stats without GraphQL auth scopes."""
-    user_resp = requests.get(f"{REST_API}/users/{USERNAME}", headers=HEADERS, timeout=15)
-    user_resp.raise_for_status()
-    user = user_resp.json()
-
-    repos = []
-    page = 1
-    while True:
-        repos_resp = requests.get(
-            f"{REST_API}/users/{USERNAME}/repos",
-            params={
-                "type": "owner",
-                "sort": "updated",
-                "per_page": 100,
-                "page": page,
-            },
-            headers=HEADERS,
-            timeout=15,
-        )
-        repos_resp.raise_for_status()
-        batch = repos_resp.json()
-        if not batch:
-            break
-        repos.extend(batch)
-        if len(batch) < 100:
-            break
-        page += 1
-
-    total_stars = sum(r.get("stargazers_count", 0) for r in repos)
-    total_forks = sum(r.get("forks_count", 0) for r in repos)
-
-    lang_counts = {}
-    for r in repos:
-        lang = r.get("language")
-        if lang:
-            lang_counts[lang] = lang_counts.get(lang, 0) + 1
-    top_langs = sorted(lang_counts.items(), key=lambda kv: -kv[1])
-
-    commit_count, commit_count_source = fetch_public_commit_count()
-    contributions_last_year, contrib_source = fetch_public_contributions_last_year()
-
-    stats = {
-        "repos": user.get("public_repos", len(repos)),
-        "followers": user.get("followers", 0),
-        "stars": total_stars,
-        "forks": total_forks,
-        "commits": commit_count,
-        "contributions_last_year": contributions_last_year,
-        "top_langs": top_langs,
-        "updated": now_ist_string(),
-        "source": f"live (public API, {commit_count_source}, {contrib_source})",
-    }
-    save_cache(stats)
-    return stats
-
-
-def fetch_public_commit_count():
-    """Best-effort public commit count for the current year via REST search."""
-    now_ist = datetime.datetime.now(IST).date()
-    year_start = now_ist.replace(month=1, day=1)
-    query = f"author:{USERNAME} committer-date:{year_start.isoformat()}..{now_ist.isoformat()}"
-
-    headers = dict(HEADERS)
-    # Commit search historically used a preview media type; keep it for compatibility.
-    headers["Accept"] = "application/vnd.github.cloak-preview+json"
-
-    try:
-        resp = requests.get(
-            f"{REST_API}/search/commits",
-            params={"q": query, "per_page": 1},
-            headers=headers,
-            timeout=15,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        count = int(data.get("total_count", 0))
-        if count >= 1000:
-            print("::warning::Commit search capped at 1000 by GitHub Search API.")
-        return count, "commit search"
-    except Exception as e:
-        print(f"::warning::Public commit search failed ({e}); using 0 commits.")
-        return 0, "commit search unavailable"
-
-
-def fetch_public_contributions_last_year():
-    """Best-effort public total contributions for the last 365 days."""
-    to_date = datetime.datetime.now(IST).date()
-    from_date = to_date - datetime.timedelta(days=365)
-
-    try:
-        resp = requests.get(
-            f"https://github.com/users/{USERNAME}/contributions",
-            params={"from": from_date.isoformat(), "to": to_date.isoformat()},
-            headers=HEADERS,
-            timeout=20,
-        )
-        resp.raise_for_status()
-        html = resp.text
-        counts = [int(x) for x in re.findall(r">(\d+) contributions? on [^<]+<", html)]
-        if counts:
-            return sum(counts), "contrib calendar"
-
-        # fallback: read visible summary number if tooltip format changes
-        m = re.search(
-            r'id="js-contribution-activity-description"[\s\S]*?>\s*([\d,]+)\s*\n\s*contributions?',
-            html,
-        )
-        if m:
-            return int(m.group(1).replace(",", "")), "contrib header"
-
-        print("::warning::Could not parse public contributions calendar.")
-        return 0, "contrib parse unavailable"
-    except Exception as e:
-        print(f"::warning::Public contributions fetch failed ({e}); using 0 contributions.")
-        return 0, "contrib fetch unavailable"
-
-
-def load_cache():
-    if os.path.exists(CACHE_PATH):
-        with open(CACHE_PATH) as f:
-            return json.load(f)
-    # first-ever run, no cache yet — safe zeroed defaults
-    return {
-        "repos": 0, "followers": 0, "stars": 0, "forks": 0,
-        "commits": 0, "contributions_last_year": 0, "top_langs": [],
-        "updated": "never",
-    }
-
-
-def save_cache(stats):
-    os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
-    with open(CACHE_PATH, "w") as f:
-        json.dump(stats, f, indent=2)
-
-
-# ---------------------------------------------------------------------------
-# SVG rendering — our own design, not a copy of anyone else's card.
-# Two themes rendered from one template so GitHub's #gh-dark/#gh-light-mode
-# picture toggle can pick the right one automatically.
-# ---------------------------------------------------------------------------
+API = "https://api.github.com"
+GITHUB = "https://github.com"
+ROOT = Path(__file__).resolve().parent
+GREETING = "how a going man"
 THEMES = {
-    "dark": {
-        "bg": "#0b0e14", "card_stroke": "#1c2230", "divider": "#1c2230",
-        "text_primary": "#e6e9ef", "text_muted": "#7d8590", "text_dim": "#565f78",
-        "accent_blue": "#7aa2f7", "accent_amber": "#e5c07b", "accent_green": "#98c379",
-        "text_body": "#c8cdd8",
-    },
     "light": {
-        "bg": "#ffffff", "card_stroke": "#d0d7de", "divider": "#e8ecef",
-        "text_primary": "#1c2230", "text_muted": "#57606a", "text_dim": "#8b949e",
-        "accent_blue": "#2563eb", "accent_amber": "#b8860b", "accent_green": "#1a7f37",
-        "text_body": "#24292f",
+        "background": "#ffffff", "border": "#d0d7de", "divider": "#e8ecef",
+        "muted": "#57606a", "number": "#8a6200",
+    },
+    "dark": {
+        "background": "#0b0e14", "border": "#1c2230", "divider": "#1c2230",
+        "muted": "#949dac", "number": "#e5c07b",
     },
 }
 
-def compute_height(stats):
-    """Height depends on how many skill-chip rows wrap and how many
-    contact rows are visible, so the canvas fits content exactly."""
-    n_skill_lines = len(wrap_skills(SKILLS, max_per_line=5))
-    n_contacts = len([1 for _, v in CONTACTS if v])
 
-    y = 186                                          # header -> first rule
-    y += 40 + (n_skill_lines - 1) * 40 + 14           # skill chip rows -> rule2
-    y += 28 + 42 + 22 + 30                            # stats block -> rule3
-    y += 28 + 32 + max(n_contacts, 1) * 30 + 4        # connect block -> rule4
-    y += 28 + 60                                      # footer text + generous bottom margin
-    return y
+def get(url, *, api=False):
+    headers = {"User-Agent": "github-profile-readme", "Accept-Language": "en"}
+    if api:
+        headers["Accept"] = "application/vnd.github+json"
+    with urlopen(Request(url, headers=headers), timeout=30) as response:
+        return response.read().decode("utf-8")
 
 
-WIDTH = 1000
+def api_json(path):
+    return json.loads(get(f"{API}{path}", api=True))
 
 
-def wrap_skills(skills, max_per_line=5):
-    """Split the fixed SKILLS list into rows for the chip grid."""
-    lines, current = [], []
-    for name, color in skills:
-        current.append((name, color))
-        if len(current) == max_per_line:
-            lines.append(current)
-            current = []
-    if current:
-        lines.append(current)
-    return lines
+class ProfileFollowers(HTMLParser):
+    def __init__(self, login):
+        super().__init__()
+        self.profile_path = f"/{login}".casefold()
+        self.reading_link = False
+        self.count = None
+        self.text = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a" and self.count is None:
+            url = urlsplit(dict(attrs).get("href", ""))
+            self.reading_link = url.path.casefold() == self.profile_path and url.query == "tab=followers"
+            self.text = []
+
+    def handle_data(self, data):
+        if self.reading_link:
+            self.text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self.reading_link:
+            label = " ".join("".join(self.text).split())
+            match = re.fullmatch(r"([0-9,]+(?:\.[0-9]+)?[kmb]?) followers?", label, re.I)
+            if match:
+                self.count = match[1]
+            self.reading_link = False
 
 
-def chip_width(name):
-    # rough monospace width estimate: dot + gap + text, padded
-    return 22 + len(name) * 9 + 26
+def profile_follower_count(html, login, api_count):
+    # Use the count visitors see on GitHub's profile page, including its abbreviations.
+    parser = ProfileFollowers(login)
+    parser.feed(html)
+    parser.close()
+    if parser.count is not None:
+        return parser.count
+    if api_count == 0:
+        return "0"
+    raise ValueError("Could not read the follower count displayed on the GitHub profile")
 
 
-def render_svg(stats, theme_name):
-    t = THEMES[theme_name]
-    HEIGHT = compute_height(stats)
-    skill_lines = wrap_skills(SKILLS, max_per_line=5)
+class ContributionCalendar(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reading_heading = False
+        self.heading = []
+        self.days = {}
+        self.bounds = None
 
-    is_live = stats.get("source") == "live"
-    status_color = t["accent_green"] if is_live else "#e06c75"
-    status_text = "live" if is_live else stats.get("source", "cached")
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == "h2" and attrs.get("id") == "js-contribution-activity-description":
+            self.reading_heading = True
+        if tag == "div" and "js-calendar-graph" in attrs.get("class", "").split():
+            self.bounds = tuple(date.fromisoformat(attrs[key].split()[0]) for key in ("data-from", "data-to"))
+        if tag == "td" and "ContributionCalendar-day" in attrs.get("class", "").split():
+            day = date.fromisoformat(attrs["data-date"])
+            level = int(attrs["data-level"])
+            if day in self.days or not 0 <= level <= 4:
+                raise ValueError("Unexpected GitHub contribution calendar cell")
+            self.days[day] = level
 
-    parts = [f'''<svg width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .mono {{ font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }}
-    .name {{ font-size: 32px; fill: {t['text_primary']}; }}
-    .alias {{ font-size: 19px; fill: {t['accent_blue']}; }}
-    .muted {{ font-size: 15px; fill: {t['text_muted']}; }}
-    .label {{ font-size: 15px; fill: {t['text_dim']}; }}
-    .body {{ font-size: 17px; fill: {t['text_body']}; }}
-    .statnum {{ font-size: 27px; fill: {t['accent_amber']}; }}
-    .statlabel {{ font-size: 13px; fill: {t['text_dim']}; }}
-    .key {{ font-size: 16px; fill: {t['accent_blue']}; }}
-    .val {{ font-size: 16px; fill: {t['text_body']}; }}
-  </style>
+    def handle_data(self, data):
+        if self.reading_heading:
+            self.heading.append(data)
 
-  <rect x="0.5" y="0.5" width="{WIDTH-1}" height="{HEIGHT-1}" rx="14" fill="{t['bg']}" stroke="{t['card_stroke']}" stroke-width="1"/>
+    def handle_endtag(self, tag):
+        if tag == "h2":
+            self.reading_heading = False
 
-  <circle cx="36" cy="36" r="6" fill="#e06c75"/>
-  <circle cx="58" cy="36" r="6" fill="#e5c07b"/>
-  <circle cx="80" cy="36" r="6" fill="#98c379"/>
-  <text x="{WIDTH-44}" y="41" text-anchor="end" class="mono muted">~/{USERNAME.lower()}</text>
 
-  <text x="44" y="100" class="mono name">{DISPLAY_NAME}</text>
-  <text x="44" y="130" class="mono alias">{ALIAS}</text>
-  <text x="44" y="158" class="mono muted">{LOCATION}</text>
+def parse_calendar(html, today):
+    calendar = ContributionCalendar()
+    calendar.feed(html)
+    calendar.close()
+    heading = " ".join("".join(calendar.heading).split())
+    match = re.fullmatch(r"([0-9][0-9,]*) contributions? in the last year", heading)
+    if not match or not calendar.bounds:
+        raise ValueError("GitHub's contribution calendar markup has changed")
+    first, last = calendar.bounds
+    span = (last - first).days + 1
+    days = sorted(calendar.days.items())
+    complete = 364 <= span <= 372 and len(days) == span and days[0][0] == first and days[-1][0] == last
+    current = today - timedelta(days=1) <= last <= today
+    if not complete or not current:
+        raise ValueError("GitHub returned an incomplete or out-of-date contribution calendar")
+    return int(match[1].replace(",", ""))
 
-  <line x1="44" y1="186" x2="{WIDTH-44}" y2="186" stroke="{t['divider']}" stroke-width="1" stroke-dasharray="4 4"/>
 
-  <text x="44" y="214" class="mono label">skills</text>''']
+def render_readme(metrics):
+    summary = ", ".join(f"{count} {label}" for count, label in metrics)
+    alt = escape(f"{GREETING}. GitHub stats: {summary}.", quote=True)
+    return f'''<!-- Generated by today.py from public GitHub data. -->
 
-    # --- fixed skills grid, rendered as colored chips ---
-    y = 234
-    for line in skill_lines:
-        x = 44
-        for name, color in line:
-            w = chip_width(name)
-            parts.append(f'  <rect x="{x}" y="{y}" width="{w}" height="30" rx="15" fill="{t["card_stroke"]}" opacity="0.5"/>')
-            parts.append(f'  <circle cx="{x+18}" cy="{y+15}" r="5" fill="{color}"/>')
-            parts.append(f'  <text x="{x+32}" y="{y+20}" class="mono body" style="font-size:14px">{name}</text>')
-            x += w + 10
-        y += 40
+<div align="center">
 
-    rule2_y = y + 4
-    parts.append(f'  <line x1="44" y1="{rule2_y}" x2="{WIDTH-44}" y2="{rule2_y}" stroke="{t["divider"]}" stroke-width="1" stroke-dasharray="4 4"/>')
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="dark_mode.svg">
+  <img src="light_mode.svg" width="900" alt="{alt}">
+</picture>
 
-    stats_label_y = rule2_y + 28
-    parts.append(f'  <text x="44" y="{stats_label_y}" class="mono label">live stats</text>')
+</div>
+'''
 
-    row_y = stats_label_y + 42
-    row_label_y = row_y + 22
-    cols = [
-        (44,  stats['repos'],     "repositories"),
-        (194, stats['stars'],     "stars earned"),
-        (344, stats['commits'],   "commits (this yr)"),
-        (554, stats['followers'], "followers"),
-        (704, stats['forks'],     "forks received"),
+
+def render_card(metrics, theme):
+    colors = THEMES[theme]
+    parts = [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="230" viewBox="0 0 1000 230">',
+        '<rect x=".5" y=".5" width="999" height="229" rx="8" '
+        f'fill="{colors["background"]}" stroke="{colors["border"]}"/>',
+        '<g font-family="SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace">',
     ]
-    for x, val, label in cols:
-        parts.append(f'  <text x="{x}" y="{row_y}" class="mono statnum">{val}</text>')
-        parts.append(f'  <text x="{x}" y="{row_label_y}" class="mono statlabel">{label}</text>')
 
-    rule3_y = row_label_y + 30
-    parts.append(f'  <line x1="44" y1="{rule3_y}" x2="{WIDTH-44}" y2="{rule3_y}" stroke="{t["divider"]}" stroke-width="1" stroke-dasharray="4 4"/>')
+    def label(x, y, value, size, color="muted"):
+        parts.append(f'<text x="{x}" y="{y}" font-size="{size}" fill="{colors[color]}">{escape(value)}</text>')
 
-    # --- item 5: contacts / links block ---
-    connect_label_y = rule3_y + 28
-    parts.append(f'  <text x="44" y="{connect_label_y}" class="mono label">connect</text>')
+    for x, color in zip((36, 58, 80), ("#e06c75", "#e5c07b", "#98c379")):
+        parts.append(f'<circle cx="{x}" cy="36" r="6" fill="{color}"/>')
+    label(44, 83, GREETING, 16)
+    parts.append(f'<path d="M44 105H956" stroke="{colors["divider"]}" stroke-dasharray="4 4"/>')
 
-    c_y = connect_label_y + 32
-    visible_contacts = [(k, v) for k, v in CONTACTS if v]
-    for key, val in visible_contacts:
-        parts.append(f'  <text x="44" y="{c_y}" class="mono key">{key}</text>')
-        parts.append(f'  <text x="200" y="{c_y}" class="mono val">{val}</text>')
-        c_y += 30
+    label(44, 136, "live stats", 15)
+    for x, (count, title) in zip((44, 348, 697), metrics):
+        label(x, 176, count, 27, "number")
+        label(x, 199, title, 14)
 
-    rule4_y = c_y + 4
-    parts.append(f'  <line x1="44" y1="{rule4_y}" x2="{WIDTH-44}" y2="{rule4_y}" stroke="{t["divider"]}" stroke-width="1" stroke-dasharray="4 4"/>')
-
-    footer_y = rule4_y + 28
-    parts.append(f'  <text x="44" y="{footer_y}" class="mono muted">last synced {stats["updated"]}</text>')
-    parts.append(f'  <circle cx="{WIDTH-206}" cy="{footer_y-5}" r="5" fill="{status_color}"/>')
-    parts.append(f'  <text x="{WIDTH-194}" y="{footer_y}" class="mono muted">{status_text}</text>')
-
-    parts.append('</svg>')
+    parts.extend(["</g>", "</svg>", ""])
     return "\n".join(parts)
 
 
 def main():
-    stats = fetch_stats()
-    for theme in ("dark", "light"):
-        svg = render_svg(stats, theme)
-        out_path = f"{theme}_mode.svg"
-        with open(out_path, "w") as f:
-            f.write(svg)
-        print(f"Wrote {out_path}")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--username", default=os.environ.get("GH_USERNAME"), help="GitHub login (defaults to GH_USERNAME)")
+    args = parser.parse_args()
+    if not args.username or not re.fullmatch(r"[A-Za-z0-9-]+", args.username):
+        parser.error("provide a valid GitHub username")
+
+    profile = api_json(f"/users/{args.username}")
+    login = profile["login"]
+    followers = profile_follower_count(get(f"{GITHUB}/{login}"), login, profile["followers"])
+    calendar = get(f"{GITHUB}/users/{login}/contributions")
+    contributions = parse_calendar(calendar, datetime.now(timezone.utc).date())
+    metrics = [
+        (f"{profile['public_repos']:,}", "public repositories"),
+        (f"{contributions:,}", "contributions (last year)"),
+        (followers, "followers"),
+    ]
+
+    # Finish fetching and rendering before replacing the last published snapshot.
+    files = {"README.md": render_readme(metrics)}
+    files.update({f"{theme}_mode.svg": render_card(metrics, theme) for theme in THEMES})
+    for name, content in files.items():
+        path = ROOT / name
+        if not path.exists() or path.read_text(encoding="utf-8") != content:
+            path.write_text(content, encoding="utf-8")
 
 
 if __name__ == "__main__":
