@@ -4,7 +4,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="dark_mode.svg">
-  <img src="light_mode.svg" width="900" alt="how a going man. GitHub stats: 35 public repositories, 1,236 contributions (last year), 47 followers.">
+  <img src="light_mode.svg" width="900" alt="how a going man. GitHub stats: 35 public repositories, 1,251 contributions (last year), 47 followers.">
 </picture>
 
 </div>
